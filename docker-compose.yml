@@ -1,0 +1,60 @@
+version: '3'
+services:
+        web:
+                image: nginx:latest
+                container_name: nginx
+                depends_on:
+                        - db
+                        - php 
+                links:
+                        - db 
+                        - php
+                volumes:
+                        - ./webcontent:/var/www/html
+                        - ./nginx:/etc/nginx/conf.d/
+                ports:
+                        - "80:80"
+                restart: always
+                tty: true
+                networks:
+                        - goral
+        php:
+                #image: php:7.4-fpm
+                container_name: php
+                build:
+                        context: .
+                        dockerfile: Dockerfile
+                restart: always
+                stdin_open: true
+                tty: true
+                volumes:
+                        - ./memory_limit_php.ini:/usr/local/etc/php/conf.d/memory-limit-php.ini
+                        - ./webcontent:/var/www/html
+                networks:
+                        - goral
+        db:
+                image: mysql:latest
+                container_name: mysql
+                restart: always
+                stdin_open: true
+                tty: true
+                ports:
+                        - "3306:3306"
+                volumes:
+                        - /dbdata:/var/lib/mysql
+                environment:
+                        MYSQL_DATABASE: wordpress
+                        MYSQL_ROOT_PASSWORD: addweb123
+                        MYSQL_USER: wpuser
+                        MYSQL_PASSWORD: addweb123
+                        WORDPRESS_DB_NAME: wordpress
+                networks:
+                        - goral
+volumes:
+        bdata:
+        webcontent:
+        nginx:
+  
+networks:
+        goral:
+                external: true
